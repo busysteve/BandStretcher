@@ -6,6 +6,7 @@
 HX711 scale(A0, A1);		// parameter "gain" is ommited; the default value 128 is used by the library
 bool GOT_IT = false;
 bool SPINDLE_RELEASE = false;
+bool PRELOAD = true;
 
 void setup() {
   Serial.begin(115200);
@@ -57,8 +58,22 @@ void setup() {
 
   while( digitalRead( 13 ) == HIGH )
     delay(10);
+  int hold = millis();
   while( digitalRead( 13 ) == LOW )
     delay(10);
+  if( (millis() - hold) > 3000 )
+  {
+    stepTest();
+
+    Serial.println("\nPush start button\n");
+    
+    while( digitalRead( 13 ) == HIGH )
+      delay(10);
+    int hold = millis();
+    while( digitalRead( 13 ) == LOW )
+      delay(10);
+  }  
+
     
   SPINDLE_RELEASE = false;
   spindlePull();
@@ -100,27 +115,83 @@ void spindleRelease()
   digitalWrite( 8, HIGH );
 }
 
+void stepTest()
+{
+  bool ilock = false;
+
+  Serial.println("Step mode");
+  spindleStop();
+  
+  while( true )
+  {
+    while( digitalRead( 13 ) == HIGH )
+      delay(10);
+      
+    int hold = millis();
+    
+    while( digitalRead( 13 ) == LOW )
+      delay(10);
+      
+/*
+    if( (millis() - hold) > 5000 )
+    {
+      spindleStop();
+      return;
+    }
+*/
+    spindlePull();
+
+    while( digitalRead(12) == HIGH )
+    {
+      delay(5);
+    }
+
+    while( digitalRead(12) == LOW )
+    {
+      delay(5);
+    }
+
+    spindleStop();
+      
+  }
+  
+}
+
+
 void loop() {
-  //Serial.print("one reading:\t");
-  //Serial.print(scale.get_units(), 1);
-  //Serial.print("\t| average:\t");
-  //Serial.print(scale.get_units(4), 1);
-  //Serial.print("\t| value:\t");
-  //Serial.println(scale.get_value(), 1);
+
 
   if( digitalRead( 12 ) == HIGH && GOT_IT == false )
   {
     spindleStop();
     float grams = scale.get_units();
     //Serial.print("one reading:\t");
-    Serial.println(grams*.001, 1);
+    Serial.println(grams*.001, 3);
     //Serial.print("\t| average:\t");
     //Serial.print(scale.get_units(4), 1);
     //Serial.print("\t| value:\t");
     //Serial.println(scale.get_value(), 1);
     GOT_IT = true;
+  
+    // preload 
+    if( PRELOAD && grams < 200 )
+    {
+      Serial.println("Preloading...");
+    }    
+    else if( PRELOAD && grams >= 200 )
+    {
+      Serial.println("Preloaded:");
+      Serial.println("\nPush button to stretch\n");
 
-    if( SPINDLE_RELEASE && grams < 200 )
+      PRELOAD = false;
+      
+      while( digitalRead( 13 ) == HIGH )
+        delay(10);
+      int hold = millis();
+      while( digitalRead( 13 ) == LOW )
+        delay(10);
+    }
+    else if( SPINDLE_RELEASE && grams < 200 )
     {
       spindleStop();
       Serial.println("Stopped");
