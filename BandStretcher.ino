@@ -79,15 +79,6 @@ void setup() {
   spindlePull();
 }
 
-
-void spindleStopOld()
-{
-  digitalWrite( 11, LOW );
-  digitalWrite( 10, LOW );
-  digitalWrite( 9, LOW );
-  digitalWrite( 8, LOW );
-}
-
 void spindleStop()
 {
   digitalWrite( 11, HIGH );
@@ -174,11 +165,11 @@ void loop() {
     GOT_IT = true;
   
     // preload 
-    if( PRELOAD && grams < 200 )
+    if( PRELOAD && grams < 100 )
     {
       Serial.println("Preloading...");
     }    
-    else if( PRELOAD && grams >= 200 )
+    else if( PRELOAD && grams >= 100 )
     {
       Serial.println("Preloaded:");
       Serial.println("\nPush button to stretch\n");
