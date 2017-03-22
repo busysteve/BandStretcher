@@ -8,6 +8,12 @@ bool GOT_IT = false;
 bool SPINDLE_RELEASE = false;
 bool PRELOAD = true;
 
+
+float len_inc = 0.8177;  // "(1.562 * PI) / 6" --- line spool circumfrence by 6 holes
+float len = 0.0;
+
+float max_slope = 2800.0;
+
 void setup() {
   Serial.begin(115200);
   Serial.println("HX711 Demo");
@@ -151,13 +157,39 @@ void stepTest()
 
 void loop() {
 
+float grams = 0.0;
 
   if( digitalRead( 12 ) == HIGH && GOT_IT == false )
   {
     spindleStop();
-    float grams = scale.get_units();
+
+    float x1, x2, y1, y2, slope;
+    
+    x1 = len;
+    y1 = grams;
+
+    if( SPINDLE_RELEASE )
+      len -= len_inc;
+    else
+      len += len_inc;
+
+    grams = scale.get_units();
+
+    x2 = len;
+    y2 = grams;
+
+    slope = (y2-y1) / (x2-x1);
+
+    if( grams > 1000.0 && slope >= max_slope )
+      SPINDLE_RELEASE = true;
+    
     //Serial.print("one reading:\t");
-    Serial.println(grams*.001, 3);
+
+    Serial.print( len, 3 );
+    Serial.print( "\t" );
+    Serial.print(grams*.001, 3);
+    Serial.print( "\t" );
+    Serial.println(slope, 3);
     //Serial.print("\t| average:\t");
     //Serial.print(scale.get_units(4), 1);
     //Serial.print("\t| value:\t");
@@ -165,16 +197,20 @@ void loop() {
     GOT_IT = true;
   
     // preload 
-    if( PRELOAD && grams < 100 )
+    if( PRELOAD && grams < 20 )
     {
       Serial.println("Preloading...");
+      spindleStop();
+      delay(200);
     }    
-    else if( PRELOAD && grams >= 100 )
+    else if( PRELOAD && grams >= 20 )
     {
+      spindleStop();
       Serial.println("Preloaded:");
       Serial.println("\nPush button to stretch\n");
 
       PRELOAD = false;
+      len = len_inc;
       
       while( digitalRead( 13 ) == HIGH )
         delay(10);
