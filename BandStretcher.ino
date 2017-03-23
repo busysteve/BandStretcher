@@ -12,7 +12,9 @@ bool PRELOAD = true;
 float len_inc = 0.8177;  // "(1.562 * PI) / 6" --- line spool circumfrence by 6 holes
 float len = 0.0;
 
-float max_slope = 2800.0;
+float max_slope = 250.0;
+
+float grams = 0.0, x1 = 0.0, x2 = 0.0, y1 = 0.0, y2 = 0.0, slope = 0.0;
 
 void setup() {
   Serial.begin(115200);
@@ -91,7 +93,11 @@ void spindleStop()
   digitalWrite( 10, HIGH );
   digitalWrite( 9, HIGH );
   digitalWrite( 8, HIGH );
-  delay(3);
+
+  if( SPINDLE_RELEASE )
+    delay(3);
+  else
+    delay(3);
 }
 
 void spindlePull()
@@ -157,13 +163,12 @@ void stepTest()
 
 void loop() {
 
-float grams = 0.0;
 
   if( digitalRead( 12 ) == HIGH && GOT_IT == false )
   {
     spindleStop();
 
-    float x1, x2, y1, y2, slope;
+    
     
     x1 = len;
     y1 = grams;
@@ -178,16 +183,31 @@ float grams = 0.0;
     x2 = len;
     y2 = grams;
 
-    slope = (y2-y1) / (x2-x1);
+    slope = ( (y2-y1) / (x2-x1) );
 
-    if( grams > 1000.0 && slope >= max_slope )
+    if( grams > 1700.0 && slope >= max_slope && !SPINDLE_RELEASE )
+    {
       SPINDLE_RELEASE = true;
+      Serial.println("\nReleasing\n");
+      delay( 1500 );
+
+    }
     
     //Serial.print("one reading:\t");
 
     Serial.print( len, 3 );
     Serial.print( "\t" );
     Serial.print(grams*.001, 3);
+    /*
+    Serial.print( "\t" );
+    Serial.print(y2, 3);
+    Serial.print( "\t" );
+    Serial.print(y1, 3);
+    Serial.print( "\t" );
+    Serial.print(x2, 3);
+    Serial.print( "\t" );
+    Serial.print(x1, 3);
+    */
     Serial.print( "\t" );
     Serial.println(slope, 3);
     //Serial.print("\t| average:\t");
