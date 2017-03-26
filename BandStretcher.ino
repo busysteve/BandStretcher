@@ -15,7 +15,10 @@ float len = 0.0;
 float max_slope = 250.0;
 
 float grams = 0.0, x1 = 0.0, x2 = 0.0, y1 = 0.0, y2 = 0.0, slope = 0.0;
+bool need_pull_len = true;
+float pull_len = 0.0;
 
+ 
 void setup() {
   Serial.begin(115200);
   Serial.println("HX711 Demo");
@@ -84,7 +87,8 @@ void setup() {
 
     
   SPINDLE_RELEASE = false;
-  spindlePull();
+  //spindlePull();
+  Serial.println( "\n\nEnter the pull length in inches\n\n");
 }
 
 void spindleStop()
@@ -94,10 +98,6 @@ void spindleStop()
   digitalWrite( 9, HIGH );
   digitalWrite( 8, HIGH );
 
-  if( SPINDLE_RELEASE )
-    delay(3);
-  else
-    delay(3);
 }
 
 void spindlePull()
@@ -162,113 +162,137 @@ void stepTest()
 
 
 void loop() {
-
-
-  if( digitalRead( 12 ) == HIGH && GOT_IT == false )
+     
+  while( need_pull_len && Serial.available() > 0 )
   {
-    spindleStop();
+    pull_len = Serial.parseFloat();
 
-    
-    
-    x1 = len;
-    y1 = grams;
-
-    if( SPINDLE_RELEASE )
-      len -= len_inc;
-    else
-      len += len_inc;
-
-    grams = scale.get_units();
-
-    x2 = len;
-    y2 = grams;
-
-    slope = ( (y2-y1) / (x2-x1) );
-
-    if( grams > 1700.0 && slope >= max_slope && !SPINDLE_RELEASE )
+    if( Serial.read() == '\n' )
     {
-      SPINDLE_RELEASE = true;
-      Serial.println("\nReleasing\n");
-      delay( 1500 );
-
+      if( pull_len > 0.0 )
+      {
+        need_pull_len = false;
+        Serial.print("\nPull Length: ");
+        Serial.println( pull_len );
+        spindlePull();
+      }
     }
+  }
+
+  ///Serial.print("\nPull Length: ");
+  ///Serial.println( pull_len );
+
+  if( !need_pull_len && pull_len > 1.0 )
+  {
+    {
+      if( digitalRead( 12 ) == HIGH && GOT_IT == false )
+      {
+        spindleStop();
     
-    //Serial.print("one reading:\t");
-
-    Serial.print( len, 3 );
-    Serial.print( "\t" );
-    Serial.print(grams*.001, 3);
-    /*
-    Serial.print( "\t" );
-    Serial.print(y2, 3);
-    Serial.print( "\t" );
-    Serial.print(y1, 3);
-    Serial.print( "\t" );
-    Serial.print(x2, 3);
-    Serial.print( "\t" );
-    Serial.print(x1, 3);
-    */
-    Serial.print( "\t" );
-    Serial.println(slope, 3);
-    //Serial.print("\t| average:\t");
-    //Serial.print(scale.get_units(4), 1);
-    //Serial.print("\t| value:\t");
-    //Serial.println(scale.get_value(), 1);
-    GOT_IT = true;
-  
-    // preload 
-    if( PRELOAD && grams < 20 )
-    {
-      Serial.println("Preloading...");
-      spindleStop();
-      delay(200);
-    }    
-    else if( PRELOAD && grams >= 20 )
-    {
-      spindleStop();
-      Serial.println("Preloaded:");
-      Serial.println("\nPush button to stretch\n");
-
-      PRELOAD = false;
-      len = len_inc;
+        
+        
+        x1 = len;
+        y1 = grams;
+    
+        if( SPINDLE_RELEASE )
+          len -= len_inc;
+        else
+          len += len_inc;
+    
+        grams = scale.get_units();
+    
+        x2 = len;
+        y2 = grams;
+    
+        slope = ( (y2-y1) / (x2-x1) );
+    
+        //if( grams > 1700.0 && slope >= max_slope && !SPINDLE_RELEASE )
+        if( len >= pull_len )
+        {
+          SPINDLE_RELEASE = true;
+          Serial.println("\nReleasing\n");
+          delay( 1500 );
+    
+        }
+        
+        //Serial.print("one reading:\t");
+    
+        Serial.print( len, 3 );
+        Serial.print( "\t" );
+        Serial.print(grams*.001, 3);
+        /*
+        Serial.print( "\t" );
+        Serial.print(y2, 3);
+        Serial.print( "\t" );
+        Serial.print(y1, 3);
+        Serial.print( "\t" );
+        Serial.print(x2, 3);
+        Serial.print( "\t" );
+        Serial.print(x1, 3);
+        */
+        Serial.print( "\t" );
+        Serial.println(slope, 3);
+        //Serial.print("\t| average:\t");
+        //Serial.print(scale.get_units(4), 1);
+        //Serial.print("\t| value:\t");
+        //Serial.println(scale.get_value(), 1);
+        GOT_IT = true;
       
-      while( digitalRead( 13 ) == HIGH )
-        delay(10);
-      int hold = millis();
-      while( digitalRead( 13 ) == LOW )
-        delay(10);
-    }
-    else if( SPINDLE_RELEASE && grams < 200 )
-    {
-      spindleStop();
-      Serial.println("Stopped");
-      
-      while(true)
-        ;
-    }
-
-    if( !SPINDLE_RELEASE ) 
-      spindlePull();
-    else
-      spindleRelease();
-  }
-  else if( digitalRead( 12 ) == LOW && GOT_IT == true )
-  {
-    GOT_IT = false;
+        // preload 
+        if( PRELOAD && grams < 10 )
+        {
+          Serial.println("Preloading...");
+          spindleStop();
+          delay(200);
+        }    
+        else if( PRELOAD && grams >= 10 )
+        {
+          spindleStop();
+          Serial.println("Preloaded:");
+          Serial.println("\nPush button to stretch\n");
     
-    if( !SPINDLE_RELEASE ) 
-      spindlePull();
-    else
-      spindleRelease();
+          PRELOAD = false;
+          //len = len_inc;
+          len = 0.0;
+          
+          while( digitalRead( 13 ) == HIGH )
+            delay(10);
+          int hold = millis();
+          while( digitalRead( 13 ) == LOW )
+            delay(10);
+        }
+        else if( SPINDLE_RELEASE && grams < 500 )
+        {
+          spindleStop();
+          Serial.println("Stopped");
+          
+          while(true)
+            ;
+        }
+    
+        if( !SPINDLE_RELEASE ) 
+          spindlePull();
+        else
+          spindleRelease();
+      }
+      else if( digitalRead( 12 ) == LOW && GOT_IT == true )
+      {
+        GOT_IT = false;
+        
+        if( !SPINDLE_RELEASE ) 
+          spindlePull();
+        else
+          spindleRelease();
+      }
+    
+      if( digitalRead( 13 ) == LOW && SPINDLE_RELEASE == false )
+      {
+        Serial.println("\nReleasing\n");
+        SPINDLE_RELEASE = true;
+        spindleRelease();
+      }
+    }
   }
-
-  if( digitalRead( 13 ) == LOW && SPINDLE_RELEASE == false )
-  {
-    Serial.println("\nReleasing\n");
-    SPINDLE_RELEASE = true;
-    spindleRelease();
-  }
-
   //scale.power_down();			        // put the ADC in sleep mode
   //delay(50);
   //scale.power_up();
