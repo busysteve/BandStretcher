@@ -24,4 +24,7 @@ These are the photos of the current slingshot band stretcher
 ![alt text](https://raw.githubusercontent.com/busysteve/BandStretcher/master/photo/Screenshot_20170326-145401-durring-stretch.png 	"Band stretched to 32 inches" )
 
 <iframe src="https://youtu.be/Ff3LA48dPME" width="560" height="315" frameborder="0" allowfullscreen></iframe>
+
+<object data="http://www.youtube.com/embed/Ff3LA48dPME" width="560" height="315"></object>
+   
    
