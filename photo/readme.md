@@ -22,3 +22,5 @@ These are the photos of the current slingshot band stretcher
 ![alt text](https://raw.githubusercontent.com/busysteve/BandStretcher/master/photo/20170326_150326-2x-12v-DeWalt-drill-batteries.jpg		"" )
 ![alt text](https://raw.githubusercontent.com/busysteve/BandStretcher/master/photo/Screenshot_20170326-145200-before-stretch.png		"" )
 ![alt text](https://raw.githubusercontent.com/busysteve/BandStretcher/master/photo/Screenshot_20170326-145401-durring-stretch.png 	"Band stretched to 32 inches" )
+
+<a href="https://youtu.be/Ff3LA48dPME">Video</a>
