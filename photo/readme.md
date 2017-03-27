@@ -2,7 +2,7 @@ These are the photos of the current slingshot band stretcher
 
 
 
-![alt text](https://github.com/busysteve/BandStretcher/20170325_181848-cut-rubber.jpg "Cut Rubber for extreme tapered bands")
+![alt text](https://github.com/busysteve/BandStretcher/photo/20170325_181848-cut-rubber.jpg "Cut Rubber for extreme tapered bands")
 
 20170325_182434-bands-and-pouch.jpg	Add files via upload	8 hours ago
 20170326_145444-toggle-clamped-rubber.jpg	Add files via upload	8 hours ago
