@@ -17,6 +17,7 @@ float max_slope = 250.0;
 float grams = 0.0, x1 = 0.0, x2 = 0.0, y1 = 0.0, y2 = 0.0, slope = 0.0;
 bool need_pull_len = true;
 float pull_len = 0.0;
+float time_start_millis = 0.0;
 
  
 void setup() {
@@ -29,6 +30,7 @@ void setup() {
   pinMode( 10, OUTPUT );
   pinMode( 9, OUTPUT );
   pinMode( 8, OUTPUT );
+  pinMode( 7, OUTPUT );
 
   spindleStop();
 
@@ -97,6 +99,7 @@ void spindleStop()
   digitalWrite( 10, HIGH );
   digitalWrite( 9, HIGH );
   digitalWrite( 8, HIGH );
+  digitalWrite( 7, LOW );
 
 }
 
@@ -107,6 +110,7 @@ void spindlePull()
   digitalWrite( 10, LOW );
   digitalWrite( 9, HIGH );
   digitalWrite( 8, LOW );
+  digitalWrite( 7, HIGH );
 }
 
 void spindleRelease()
@@ -116,6 +120,7 @@ void spindleRelease()
   digitalWrite( 10, HIGH );
   digitalWrite( 9, LOW );
   digitalWrite( 8, HIGH );
+  digitalWrite( 7, HIGH );
 }
 
 void stepTest()
@@ -174,6 +179,7 @@ void loop() {
         need_pull_len = false;
         Serial.print("\nPull Length: ");
         Serial.println( pull_len );
+        time_start_millis = millis();
         spindlePull();
       }
     }
@@ -231,7 +237,7 @@ void loop() {
         Serial.print(x1, 3);
         */
         Serial.print( "\t" );
-        Serial.println(slope, 3);
+        Serial.println( (millis() - time_start_millis) * .001, 3 );
         //Serial.print("\t| average:\t");
         //Serial.print(scale.get_units(4), 1);
         //Serial.print("\t| value:\t");
@@ -289,6 +295,7 @@ void loop() {
       {
         Serial.println("\nReleasing\n");
         SPINDLE_RELEASE = true;
+        //time_start_millis = millis();
         spindleRelease();
       }
     }
