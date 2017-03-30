@@ -1,0 +1,436 @@
+
+<!DOCTYPE html>
+<!-- saved from url=(0040)http://busysteve.com/slingshot_calc.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-16LE">
+	<meta http-equiv="EXPIRES" content="Mon, 22 Jul 2002 11:12:01 GMT">
+	
+</head>
+<body>
+
+
+<style>
+table{
+	border-width:	2px;
+	border-style:	solid;
+	border-color:	#999999;
+	padding:	2px;
+}
+
+td
+{
+	/*font-family : arial, helvetica;*/
+	border-width:	0px;
+	border-style:	solid;
+	border-color:	#999999;
+	padding:	2px;
+	/*border-collapse:collapse;*/
+	
+	/*NOWRAP;*/
+}
+
+tr{
+	border-width:	10px;
+	border-style:	solid;
+	border-color:	#ff0000;
+	padding:	10px;
+}
+
+body{
+	color: #bbbbbb;
+  width: 100%;
+  height: 400px;
+	background-image:	 url(./mahogany_mangler_smaller.png), url(./dark_gray_foggy_bg.png);
+	background-repeat:	 no-repeat, repeat;
+	background-position: top right, top left;
+	background-size: 40%, 100%;
+}
+
+
+</style>
+
+
+<b style="color: #ff0000;">**Under Construction, but semi-functional**</b><br>
+<b style="color: #ff0000;">Last Updated 2016-05-16 v2.4</b><br>
+
+<form>
+	<input value=".215" type="text" id="bandlength">resting (stretchable) band length(meters)<br>
+	<input value=".0254" type="text" id="bandbigwidth">resting band width on big end(meters)<br>
+	<input value=".01225" type="text" id="bandsmallwidth">resting band width on small end(meters)<br>
+	<input value=".0028" type="text" id="bandthick">resting all band thickness(meters)<br>
+	<input value="6.37" type="text" id="bandforce">max comfortable band stretch force(kilograms)<br>
+	<select id="a_ammo">
+		<option value=".00036|45">.177" steel ball (BB)</option>
+		<option value=".002058|7.9375">5/16" steel ball</option>
+		<option value=".00357|9.5250">3/8" steel ball</option>
+		<option value=".0086|12.7000" selected="yes">1/2" steel ball</option>
+		<option value=".0164|15.8750">5/8" steel ball</option>
+		<option value=".02837|19.0500">3/4" steel ball</option>
+		<option value=".04505|22.2250">7/8" steel ball</option>
+		<option value=".06679|25.4">1" steel ball</option>
+		<option value=".01154|12.44600">.50 cal lead ball</option>
+		<option value=".01445|13.462">.54 cal lead ball</option>
+		<option value=".002144|8">8mm steel ball</option>
+		<option value=".004086|10">10mm steel ball</option>
+		<option value=".013789|15">15mm steel ball</option>
+		<option value=".032686|20">20mm steel ball</option>
+		<option value=".063839|25">25mm steel ball</option>
+	</select><br>
+	<button type="button" onclick="approx();">Approximate Values Below With Values Above</button><br>
+	<i>Uses above values to generate approximated data for theoretical band measurements</i>
+	<br><br>
+
+	<input value=".014" type="text" id="bandweight">stretchable band weight(kg)<br>
+	<input value=".002" type="text" id="pouch">pouch and rubber knots/ties weight at pouch(kg)<br>
+	<input value=".0086" type="text" id="ammo">ammo weight(kg)<br>
+	<input value="12.7" type="text" id="dia">ammo diameter(mm)<br>
+	<button type="button" onclick="calc();">Calculate</button><input value="" type="checkbox" id="showall">Show Detailed Output<br>
+	<table><tbody><tr>
+	<td>
+	<br>retraction force data (Kilograms)(per inch)<br>
+<textarea rows="23" cols="30" id="rdata">6.37
+6.15
+5.75
+5.43
+5.09
+4.82
+4.69
+4.57
+4.23
+3.97
+3.75
+3.62
+3.5
+3.23
+2.98
+2.69
+2.41
+2.06
+1.67
+1.29
+0.87
+0.53
+0
+</textarea></td>
+<td>
+
+<i>velocity curve</i>
+<br>
+<canvas id="velocity" width="300" height="170" style="border:1px solid #d3d3d3;">
+Your browser does not support the canvas element.
+</canvas>
+<br>
+<i>acceleration curve</i>
+<br>
+<canvas id="acceleration" width="300" height="170" style="border:1px solid #d3d3d3;">
+Your browser does not support the canvas element.
+</canvas>
+
+</td>
+</tr>
+<tr colspan="2"><td>00m&nbsp;&nbsp;<i id="fps"></i>&nbsp;&nbsp;<i id="fpe"></i>&nbsp;&nbsp;<i id="joules"></i></td></tr>
+<tr colspan="2"><td>10m&nbsp;&nbsp;<i id="fps10"></i>&nbsp;&nbsp;<i id="fpe10"></i>&nbsp;&nbsp;<i id="joules10"></i></td></tr>
+<tr colspan="2"><td>20m&nbsp;&nbsp;<i id="fps20"></i>&nbsp;&nbsp;<i id="fpe20"></i>&nbsp;&nbsp;<i id="joules20"></i></td></tr>
+<tr colspan="2"><td>25m&nbsp;&nbsp;<i id="fps25"></i>&nbsp;&nbsp;<i id="fpe25"></i>&nbsp;&nbsp;<i id="joules25"></i></td></tr>
+</tbody></table>
+</form>
+<br>
+<table id="output"></table>
+
+
+
+<script>
+
+var vcanvas = document.getElementById("velocity");
+var vctx = vcanvas.getContext("2d");
+vctx.moveTo(0,150);
+
+var acanvas = document.getElementById("acceleration");
+var actx = acanvas.getContext("2d");
+actx.moveTo(0,150);
+
+function approx()
+{
+	document.getElementById('rdata').value = ''; 
+	
+	
+	var fx = 6.37 / .75 / .215 / .0028;
+	var kt = .0005 / .5 / .0028;
+	
+	var wt = .014 / (.215 * ((.0254 + .01225)/2) * .0028);
+	
+	
+	var blength = Number(document.getElementById('bandlength').value);
+	var bswidth = Number(document.getElementById('bandsmallwidth').value);
+	var bbwidth = Number(document.getElementById('bandbigwidth').value);
+	var bthick =  Number(document.getElementById('bandthick').value);
+
+	document.getElementById('bandweight').value = wt * (blength * (Number(bswidth + Number(bbwidth)) / 2) * bthick);	
+	document.getElementById('pouch').value = .0025 + kt * bthick;
+	
+	var mkg = document.getElementById('bandforce').value;
+	
+	var x = Math.ceil( ( (blength * 1000) / 25.4) * 2.6 );
+	
+	for( i=x; i >= 0; i-- )
+	{
+		document.getElementById('rdata').value +=(( mkg / x ) * i) + '\n'; 
+	}
+	//document.getElementById('rdata').innerHTML += '0.0';
+
+	document.getElementById('ammo').value = (document.getElementById( 'a_ammo' ).value.split('|'))[0];
+	document.getElementById('dia').value = (document.getElementById( 'a_ammo' ).value.split('|'))[1];
+	
+}
+
+
+function calc()
+{
+	vctx.strokeStyle="#ffb400";
+	actx.strokeStyle="#ffb400";
+
+	//ctx.moveTo(0,0);
+	//ctx.fillRect(0, 0, 200, 100 );
+	//ctx.moveTo(0,0);
+	vctx.stroke();
+	vctx.moveTo(0,170);
+	
+	actx.stroke();
+	actx.moveTo(0,170);
+	
+	var g = 9.80665; // approx gravity acceleration m/s^2
+	var ge = g / .0254 / 12; // approx gravity acceleration m/s^2
+
+	var r_force = document.getElementById( 'rdata' ).value.split('\n');
+	
+	var dia = Number((document.getElementById( 'dia' ).value));
+	
+	var ball = Number((document.getElementById( 'ammo' ).value));
+	var ballgr = ball * 1000 * 15.4324;
+	var pouch = Number(document.getElementById( 'pouch' ).value); 
+	var mass = ball + pouch;
+	var rubber =  Number(document.getElementById( 'bandweight' ).value);
+
+	thickness = .01778; // inches
+
+	little_end = .75;
+	big_end = .75;
+
+	N = 2;
+
+	var segment=0;
+	var i=0;
+	var F;
+	var a=0.0;
+	var x = 0.0;
+	var v = 0.0;
+	var t = 0.0;
+	var dt = 0.0001;
+	t_max = .200;
+	
+
+	// initialize values
+	a = ( r_force[0] / mass );
+	var v1 = a * dt, v2 = v1;
+       	var x = (.5 * a * Math.pow(dt,2)) + (v1*dt);
+	var fps = 0.0;
+	//printf( "a=%f : v=%f : x=%f\n", a, v[0], x[0] );
+
+
+	// While position(x) < sz | this is inches of force measurements
+	//
+	var sz = 0;
+	var seg;
+	var output = document.getElementById('output');
+	
+	output.innerHTML = ''; 
+	
+	while( ( seg = Math.floor(segment = (x/.0254)) ) < (sz = r_force.length ) )
+	{
+		t++;
+
+		// Approxmate force at mid points of retraction
+		F = (((r_force[seg] - r_force[seg+1]) * ( 1 - ( (x/.0254) - seg )) ) 
+			+ Number(r_force[seg+1])) * g;
+
+
+		// Add weight of rubber as we go (approx at this time)
+		a = ( F / ( mass + ( (rubber / sz) * segment ) ) ); 
+
+		// Velocity now to split for leapfrogging
+		v2 = (a * dt);
+
+		// sum of velocity		
+		v1 = v1 + v2;
+
+		// displacment (position)
+       		x = x + ((v1-(v2*.5))*dt) + (.5 * a * Math.pow(dt,2));
+
+		// fps
+		fps = (v1 / .0254) / 12;
+		mps = v1;
+
+		// Energy
+		joules = .5 * Math.pow(v1,2) * ball;
+		fpe = ( ballgr * Math.pow(fps,2) ) / (2 * ge * 7000);
+
+	
+		if( showall.checked == true )
+		{ 
+			// report of current statistics (result on last line)
+			var row = output.insertRow();
+		
+			var col = row.insertCell();
+			col.appendChild(document.createTextNode( 'ms='+Math.round((dt*t*1000)*1000)/1000) );
+			var col = row.insertCell();
+			//col.appendChild(document.createTextNode( 'F='+Math.round(F*1000)/1000) );
+			//var col = row.insertCell();
+			//col.appendChild(document.createTextNode( 'a='+Math.round(a*1000)/1000) );
+			//var col = row.insertCell();
+			//col.appendChild(document.createTextNode( 'vt='+Math.round(v1*1000)/1000) );
+			//var col = row.insertCell();
+			//col.appendChild(document.createTextNode( 'vn='+Math.round(v2*1000)/1000) );
+			var col = row.insertCell();
+			col.appendChild(document.createTextNode( 'fps='+Math.round(fps*1000)/1000) );
+			var col = row.insertCell();
+			col.appendChild(document.createTextNode( 'fpe='+Math.round(fpe*1000)/1000) );
+			var col = row.insertCell();
+			col.appendChild(document.createTextNode( 'Joules='+Math.round(joules*1000)/1000) );
+		
+			/*
+			output.innerHTML += 
+				'<tr>' +
+				'<td>ms=' + Math.round((dt*t*1000)*1000)/1000 + '</td>' +
+				'<td>F=' + Math.round(F*1000)/1000 + '</td>' +
+				'<td>a=' + Math.round(a*1000)/1000 + '</td>' +
+				'<td>vt=' + Math.round(v1*1000)/1000 + '</td>' +
+				'<td>vn=' + Math.round(v2*1000)/1000 + '</td>' +
+				//'<td>segment=' + segment + '</td>' +
+				'<td>fps=' + Math.round(fps*1000)/1000 + '</td>' +
+				'<td>fpe=' + Math.round(fpe*1000)/1000 + '</td>' +
+				//'<td>sz=' + sz + '</td>' +
+				'</tr>'
+				;
+			*/
+		}		
+
+		vctx.lineTo(x*300,170-(fps*.80));
+		actx.lineTo(x*300,170-(a/75)*1.3);
+
+		//ctx.moveTo(fps,x);
+
+		if( F <= 0.0 )
+			break;
+	}
+	
+	document.getElementById('fps').innerHTML = 'fps='+Math.round(fps*1000)/1000;
+	document.getElementById('fpe').innerHTML = 'fpe='+Math.round(fpe*1000)/1000;
+	document.getElementById('joules').innerHTML = 'joules='+Math.round(joules*1000)/1000;
+
+	
+	x=0;
+	var did10=did20=did25=false;
+	
+	while( x <= 25.0 )
+	{
+		t++;
+		v = v1;
+
+		// Approxmate force at mid points of retraction
+		r = dia / 2;
+		V = (4/3)*Math.PI*Math.pow(r,3);
+		p = ball/V;
+		A = Math.PI*Math.pow(r,2);
+		Cd = 0.47;
+		F = .5*p*A*v;
+
+
+		// Add weight of rubber as we go (approx at this time)
+		a = -F / mass; 
+
+		// Velocity now to split for leapfrogging
+		v2 = (a * dt);
+
+		// sum of velocity		
+		v1 = v1 + v2;
+
+		// displacment (position)
+       	x = x + ((v1-(v2*.5))*dt) + (.5 * a * Math.pow(dt,2));
+
+		// fps
+		fps = (v1 / .0254) / 12;
+
+		// Energy
+		joules = .5 * Math.pow(v1,2) * ball;
+		fpe = ( ballgr * Math.pow(fps,2) ) / (2 * ge * 7000);
+
+		// report of current statistics (result on last line)
+
+		if( showall.checked == true )
+		{ 
+			var row = output.insertRow();
+		
+			var col = row.insertCell();
+			col.appendChild(document.createTextNode( 'ms='+Math.round((dt*t*1000)*1000)/1000) );
+			var col = row.insertCell();
+			//col.appendChild(document.createTextNode( 'F='+Math.round(F*1000)/1000) );
+			//var col = row.insertCell();
+			//col.appendChild(document.createTextNode( 'a='+Math.round(a*1000)/1000) );
+			//var col = row.insertCell();
+			//col.appendChild(document.createTextNode( 'vt='+Math.round(v1*1000)/1000) );
+			//var col = row.insertCell();
+			//col.appendChild(document.createTextNode( 'vn='+Math.round(v2*1000)/1000) );
+			var col = row.insertCell();
+			col.appendChild(document.createTextNode( 'fps='+Math.round(fps*1000)/1000) );
+			var col = row.insertCell();
+			col.appendChild(document.createTextNode( 'fpe='+Math.round(fpe*1000)/1000) );
+			var col = row.insertCell();
+			col.appendChild(document.createTextNode( 'Joules='+Math.round(joules*1000)/1000) );
+		}
+		
+
+		//vctx.lineTo(x*300,170-(fps*.80));
+		//actx.lineTo(x*300,170-(a/75)*1.3);
+
+		//ctx.moveTo(fps,x);
+
+		if( x >= 10.0 && !did10 )
+		{
+			document.getElementById('fps10').innerHTML = 'fps='+Math.round(fps*1000)/1000;
+			document.getElementById('fpe10').innerHTML = 'fpe='+Math.round(fpe*1000)/1000;
+			document.getElementById('joules10').innerHTML = 'joules='+Math.round(joules*1000)/1000;
+			did10 = true;
+		}
+		else if( x >= 20.0 && !did20 )
+		{
+			document.getElementById('fps20').innerHTML = 'fps='+Math.round(fps*1000)/1000;
+			document.getElementById('fpe20').innerHTML = 'fpe='+Math.round(fpe*1000)/1000;
+			document.getElementById('joules20').innerHTML = 'joules='+Math.round(joules*1000)/1000;
+			did20 = true;
+		}
+		else if( x >= 25.0 && !did25 )
+		{
+			document.getElementById('fps25').innerHTML = 'fps='+Math.round(fps*1000)/1000;
+			document.getElementById('fpe25').innerHTML = 'fpe='+Math.round(fpe*1000)/1000;
+			document.getElementById('joules25').innerHTML = 'joules='+Math.round(joules*1000)/1000;
+			did25 = true;
+			break;
+		}
+		
+		if( F <= 0.0 )
+			break;
+	}
+	
+
+
+	vctx.stroke();
+	actx.stroke();
+
+}
+
+
+
+</script>
+
+
+
+</body></html>
