@@ -21,4 +21,10 @@ These are the photos of the current slingshot band stretcher
 ![alt text](https://raw.githubusercontent.com/busysteve/BandStretcher/master/photo/20170326_150310-relay-bank-for-mechanical-H-bridge.jpg		"" )
 ![alt text](https://raw.githubusercontent.com/busysteve/BandStretcher/master/photo/20170326_150326-2x-12v-DeWalt-drill-batteries.jpg		"" )
 ![alt text](https://raw.githubusercontent.com/busysteve/BandStretcher/master/photo/Screenshot_20170326-145200-before-stretch.png		"" )
-![alt text]("https://raw.githubusercontent.com/busysteve/BandStretcher/master/photo/Screenshot_20170326-145401-durring stretch.png" 	"Band stretched to 32 inches" )
+![alt text](https://raw.githubusercontent.com/busysteve/BandStretcher/master/photo/Screenshot_20170326-145401-durring-stretch.png 	"Band stretched to 32 inches" )
+
+<iframe type="text/html" src="http://www.youtube.com/embed/Ff3LA48dPME" width="560" height="315" frameborder="0" allowfullscreen></iframe>
+<iframe id="ytplayer" class="EmbeddedVideo" type="text/html" width="640" height="390" src="https://youtube.com/embed/baXv_5z7HVY?html5=1&amp;fs=1" frameborder="0" allowfullscreen="" webkitallowfullscreen=""></iframe>
+<object data="http://www.youtube.com/embed/Ff3LA48dPME" width="560" height="315"></object>
+   
+   
