@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <!-- saved from url=(0040)http://busysteve.com/slingshot_calc.html -->
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-16LE">
@@ -50,7 +49,7 @@ body{
 
 
 <b style="color: #ff0000;">**Under Construction, but semi-functional**</b><br>
-<b style="color: #ff0000;">Last Updated 2016-05-16 v2.4</b><br>
+<b style="color: #ff0000;">Last Updated 2017-03-31 v2.6</b><br>
 
 <form>
 	<input value=".215" type="text" id="bandlength">resting (stretchable) band length(meters)<br>
@@ -58,7 +57,7 @@ body{
 	<input value=".01225" type="text" id="bandsmallwidth">resting band width on small end(meters)<br>
 	<input value=".0028" type="text" id="bandthick">resting all band thickness(meters)<br>
 	<input value="6.37" type="text" id="bandforce">max comfortable band stretch force(kilograms)<br>
-	<select id="a_ammo">
+	<select id="a_ammo" onchange="set_ammo();">
 		<option value=".00036|45">.177" steel ball (BB)</option>
 		<option value=".002058|7.9375">5/16" steel ball</option>
 		<option value=".00357|9.5250">3/8" steel ball</option>
@@ -182,6 +181,11 @@ function approx()
 	
 }
 
+function set_ammo()
+{
+	document.getElementById('ammo').value = (document.getElementById( 'a_ammo' ).value.split('|'))[0];
+	document.getElementById('dia').value = (document.getElementById( 'a_ammo' ).value.split('|'))[1];
+}
 
 function calc()
 {
@@ -430,6 +434,7 @@ function calc()
 
 
 </script>
+
 
 
 
