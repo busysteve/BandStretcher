@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- saved from url=(0040)http://busysteve.com/slingshot_calc.html -->
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-16LE">
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<meta http-equiv="EXPIRES" content="Mon, 22 Jul 2002 11:12:01 GMT">
 	
 </head>
@@ -49,7 +49,7 @@ body{
 
 
 <b style="color: #ff0000;">**Under Construction, but semi-functional**</b><br>
-<b style="color: #ff0000;">Last Updated 2017-03-31 v2.6</b><br>
+<b style="color: #ff0000;">Last Updated 2017-03-23 v2.5</b><br>
 
 <form>
 	<input value=".215" type="text" id="bandlength">resting (stretchable) band length(meters)<br>
@@ -82,60 +82,33 @@ body{
 	<input value=".002" type="text" id="pouch">pouch and rubber knots/ties weight at pouch(kg)<br>
 	<input value=".0086" type="text" id="ammo">ammo weight(kg)<br>
 	<input value="12.7" type="text" id="dia">ammo diameter(mm)<br>
+	<input value=".8177" type="text" id="inc">entry increments(in)<br>
 	<button type="button" onclick="calc();">Calculate</button><input value="" type="checkbox" id="showall">Show Detailed Output<br>
 	<table><tbody><tr>
 	<td>
-	<br>retraction force data (Kilograms)(per inch)<br>
-<textarea rows="23" cols="30" id="rdata">8.569
-8.611
-8.604
-8.406
-8.035
-7.598
-7.208
-6.871
-6.584
-6.146
-5.975
-5.822
-5.682
-5.547
-5.426
-5.316
-5.213
-5.016
-4.924
-4.836
-4.752
-4.673
-4.596
-4.517
-4.438
-4.28
-4.2
-4.122
-4.043
-3.957
-3.866
-3.675
-3.578
-3.483
-3.383
-3.281
-3.171
-2.936
-2.815
-2.696
-2.57
-2.441
-2.305
-2.158
-1.826
-1.649
-1.457
-1.245
-1.018
-0.767
+	<br>retraction force data (Kilograms)(per increment)<br>
+<textarea rows="23" cols="30" id="rdata">6.37
+6.15
+5.75
+5.43
+5.09
+4.82
+4.69
+4.57
+4.23
+3.97
+3.75
+3.62
+3.5
+3.23
+2.98
+2.69
+2.41
+2.06
+1.67
+1.29
+0.87
+0.53
 0
 </textarea></td>
 <td>
@@ -230,7 +203,7 @@ function calc()
 	actx.moveTo(0,170);
 	
 	var g = 9.80665; // approx gravity acceleration m/s^2
-	var ge = g / .0254 / 12; // approx gravity acceleration m/s^2
+	var ge = g / 0.0254 / 12; // approx gravity acceleration m/s^2
 
 	var r_force = document.getElementById( 'rdata' ).value.split('\n');
 	
@@ -241,6 +214,7 @@ function calc()
 	var pouch = Number(document.getElementById( 'pouch' ).value); 
 	var mass = ball + pouch;
 	var rubber =  Number(document.getElementById( 'bandweight' ).value);
+	var einc =  Number(document.getElementById('inc').value);
 
 	thickness = .01778; // inches
 
@@ -276,12 +250,13 @@ function calc()
 	
 	output.innerHTML = ''; 
 	
-	while( ( seg = Math.floor(segment = (x/.0254)) ) < (sz = r_force.length ) )
+	//while( ( seg = Math.floor(segment = (x/.0254)) ) < (sz = r_force.length ) )
+	while( ( seg = Math.floor(segment = (x/.0254)*einc) ) < (sz = r_force.length ) )
 	{
 		t++;
 
 		// Approxmate force at mid points of retraction
-		F = (((r_force[seg] - r_force[seg+1]) * ( 1 - ( (x/.0254) - seg )) ) 
+		F = (((r_force[seg] - r_force[seg+1]) * ( 1 - ( (x/.0254)*einc - seg )) ) 
 			+ Number(r_force[seg+1])) * g;
 
 

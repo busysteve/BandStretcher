@@ -31,6 +31,7 @@ void setup() {
   pinMode( 9, OUTPUT );
   pinMode( 8, OUTPUT );
   pinMode( 7, OUTPUT );
+  pinMode( 6, INPUT_PULLUP );
 
   spindleStop();
 
@@ -185,8 +186,14 @@ void loop() {
     }
   }
 
-  ///Serial.print("\nPull Length: ");
-  ///Serial.println( pull_len );
+
+  if( digitalRead( 6 ) == LOW )
+  {
+      spindleRelease();
+      delay(50);
+      spindleStop();
+  }
+
 
   if( !need_pull_len && pull_len > 1.0 )
   {
